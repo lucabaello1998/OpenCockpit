@@ -1,7 +1,7 @@
 {
-  "name": "claude-cockpit",
-  "version": "1.0.4",
-  "description": "Dashboard de escritorio para tu instalación local de Claude Code: uso, costos, conversaciones, memorias, MCPs, workflows y boards.",
+  "name": "opencockpit",
+  "version": "1.0.0",
+  "description": "Dashboard de escritorio multi-herramienta: uso, costos, conversaciones y memorias de Claude Code, OpenCode, Codex y Gemini/Antigravity.",
   "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
@@ -36,8 +36,8 @@
     "wait-on": "^9.0.1"
   },
   "build": {
-    "appId": "com.lucabaello1998.claudecockpit",
-    "productName": "Claude Cockpit",
+    "appId": "com.lucabaello1998.opencockpit",
+    "productName": "OpenCockpit",
     "files": [
       "electron/**/*",
       "src/main/**/*",
@@ -61,7 +61,7 @@
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
       "installerHeaderIcon": "build/icon.ico",
-      "artifactName": "Claude-Cockpit-Setup-${version}.${ext}"
+      "artifactName": "OpenCockpit-Setup-${version}.${ext}"
     },
     "directories": {
       "output": "release"
@@ -70,22 +70,23 @@
       {
         "provider": "github",
         "owner": "lucabaello1998",
-        "repo": "claude-cockpit"
+        "repo": "OpenCockpit"
       }
     ]
   },
   "author": "Luca Baello",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lucabaello1998/claude-cockpit"
+    "url": "https://github.com/lucabaello1998/OpenCockpit"
   },
   "license": "UNLICENSED",
   "keywords": [
     "claude-code",
+    "opencode",
+    "codex",
+    "gemini",
     "electron",
-    "dashboard",
-    "mcp",
-    "azure-devops"
+    "dashboard"
   ],
   "private": true
 }

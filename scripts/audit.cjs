@@ -414,7 +414,7 @@ console.log('\n-- ronda 3: correctitud --');
   esperar('barra() sabe sumar los tokens de byModel, que no trae totalTokens',
     /tokensDe = \(f\) =>/.test(src));
   esperar('el eje de dolares usa fmtUSD y no concatena el signo',
-    /tickFormatter=\{\(v\) => \(money\.show \? fmtUSD\(v\)/.test(src));
+    /tickFormatter=\{\(v\) => \((verCosto|money\.show) \? fmtUSD\(v\)/.test(src));
 }
 
 // 9. La logica del maximo, ejercitada de verdad con el orden del backend.
@@ -1082,7 +1082,7 @@ console.log('\n-- ronda 13: auto-update --');
   esperar('el empaquetador publica en GitHub Releases',
     pub.length === 1 && pub[0].provider === 'github', JSON.stringify(pub));
   esperar('y apunta al repo correcto',
-    pub[0] && pub[0].owner === 'lucabaello1998' && pub[0].repo === 'claude-cockpit');
+    pub[0] && pub[0].owner === 'lucabaello1998' && pub[0].repo === 'OpenCockpit');
   esperar('electron-updater es dependencia de produccion, no de desarrollo',
     !!(pj.dependencies || {})['electron-updater']);
 }

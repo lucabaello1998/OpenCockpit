@@ -17,7 +17,7 @@ const URL_DOC = 'https://platform.claude.com/docs/en/about-claude/pricing.md';
 
 function get(url) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { headers: { 'User-Agent': 'claude-cockpit/1.0' }, timeout: 15000 }, (res) => {
+    const req = https.get(url, { headers: { 'User-Agent': 'opencockpit/1.0' }, timeout: 15000 }, (res) => {
       if (res.statusCode !== 200) {
         res.resume();
         return reject(new Error('La documentación respondió ' + res.statusCode));

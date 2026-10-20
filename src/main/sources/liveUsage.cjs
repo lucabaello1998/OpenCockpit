@@ -95,7 +95,7 @@ function request(token) {
           'anthropic-beta': 'oauth-2025-04-20',
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          'User-Agent': 'claude-cockpit/1.0',
+          'User-Agent': 'opencockpit/1.0',
         },
         // Medido: normalmente responde en ~350 ms con 1.7 KB, pero la primera
         // consulta despues de un rato inactivo tardo 11.4 s. Con 10 s eso se

@@ -16,7 +16,7 @@ const BASE = 'https://registry.modelcontextprotocol.io/v0';
 
 function getJson(url) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { headers: { 'User-Agent': 'claude-cockpit/1.0', Accept: 'application/json' }, timeout: 15000 }, (res) => {
+    const req = https.get(url, { headers: { 'User-Agent': 'opencockpit/1.0', Accept: 'application/json' }, timeout: 15000 }, (res) => {
       if (res.statusCode !== 200) {
         res.resume();
         return reject(new Error('El registro respondió ' + res.statusCode));

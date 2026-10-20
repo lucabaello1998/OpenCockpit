@@ -24,7 +24,7 @@ const DIA_MS = 86400000;
 // ETag y responde 304 con CERO bytes si no cambio nada. Medido: 588 KB -> 0.
 function pedirTexto(url, etag) {
   return new Promise((resolve) => {
-    const headers = { 'User-Agent': 'claude-cockpit/1.0' };
+    const headers = { 'User-Agent': 'opencockpit/1.0' };
     if (etag) headers['If-None-Match'] = etag;
     const req = https.get(url, { headers, timeout: 15000 }, (res) => {
       if (res.statusCode === 304) { res.resume(); return resolve({ sinCambios: true }); }

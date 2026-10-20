@@ -309,7 +309,7 @@ function paqueteContexto(sesion, elegidos) {
   if (!(elegidos || []).length) l.push('_(no se eligió nada)_');
   l.push('');
   l.push('---');
-  l.push('_Preparado por Claude Cockpit desde el transcript._');
+  l.push('_Preparado por OpenCockpit desde el transcript._');
   return l.join('\n');
 }
 
@@ -402,7 +402,7 @@ function textoSkill(rutaCatalogo) {
     '',
     '# Traer contexto guardado',
     '',
-    'El catalogo lo mantiene Claude Cockpit y esta en:',
+    'El catalogo lo mantiene OpenCockpit y esta en:',
     '',
     '    ' + rutaCatalogo,
     '',
@@ -431,7 +431,7 @@ function textoSkill(rutaCatalogo) {
     '- No copies una memoria a este proyecto sin que te lo pidan. Traerla a la',
     '  conversacion no es lo mismo que duplicarla en disco.',
     '- Si el catalogo no existe o esta viejo, decilo en vez de inventar: se',
-    '  regenera abriendo Claude Cockpit.',
+    '  regenera abriendo OpenCockpit.',
     '',
     '# Importar un paquete',
     '',

@@ -410,7 +410,7 @@ function leeme(man, dir) {
   const conv = man.proyectos.reduce((a, p) => a + p.conversaciones.length, 0);
   const mds = man.proyectos.filter((p) => p.claudeMd).length;
 
-  l.push('# Paquete de contexto de Claude Cockpit');
+  l.push('# Paquete de contexto de OpenCockpit');
   l.push('');
   l.push('Generado el ' + man.generadoEn.slice(0, 16).replace('T', ' ')
     + (man.maquinaOrigen ? ' en **' + man.maquinaOrigen + '**' : '') + '.');
@@ -433,7 +433,7 @@ function leeme(man, dir) {
   l.push('Eso lee el `manifest.json`, te muestra qué hay y te pregunta qué querés poner');
   l.push('en su lugar. No copia nada sin que lo confirmes.');
   l.push('');
-  l.push('Si no tenés la skill instalada: Claude Cockpit → Contexto → Instalar skill. O');
+  l.push('Si no tenés la skill instalada: OpenCockpit → Contexto → Instalar skill. O');
   l.push('directamente decile a Claude que lea el `manifest.json` de esta carpeta.');
   l.push('');
   l.push('## Qué hay adentro');

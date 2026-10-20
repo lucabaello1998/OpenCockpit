@@ -21,7 +21,7 @@ const RAW = 'https://raw.githubusercontent.com';
 function getJson(url) {
   return new Promise((resolve, reject) => {
     const req = https.get(url, {
-      headers: { 'User-Agent': 'claude-cockpit/1.0', Accept: 'application/json' },
+      headers: { 'User-Agent': 'opencockpit/1.0', Accept: 'application/json' },
       timeout: 15000,
     }, (res) => {
       if (res.statusCode !== 200) { res.resume(); return reject(new Error('El directorio respondió ' + res.statusCode)); }
@@ -36,7 +36,7 @@ function getJson(url) {
 
 function getTexto(url) {
   return new Promise((resolve) => {
-    const req = https.get(url, { headers: { 'User-Agent': 'claude-cockpit/1.0' }, timeout: 10000 }, (res) => {
+    const req = https.get(url, { headers: { 'User-Agent': 'opencockpit/1.0' }, timeout: 10000 }, (res) => {
       if (res.statusCode !== 200) { res.resume(); return resolve(null); }
       let b = ''; res.setEncoding('utf8');
       res.on('data', (c) => { b += c; });

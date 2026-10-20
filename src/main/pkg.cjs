@@ -308,7 +308,7 @@ function avisoDeRutas(...contenidos) {
 
 function plan(pkg) {
   if (!pkg || pkg.kind !== KIND) {
-    throw new Error('El archivo no es un paquete de Claude Cockpit.');
+    throw new Error('El archivo no es un paquete de OpenCockpit.');
   }
   if (pkg.schemaVersion !== SCHEMA_VERSION) {
     throw new Error(`Paquete de otra versión (v${pkg.schemaVersion}); esta app entiende la v${SCHEMA_VERSION}.`);
