@@ -200,12 +200,17 @@ export default function Overview({ snap, memory, onGoto }) {
   const t = p.totals;
   // Sin tabla de precios no se grafican dolares: todo pasa a tokens, incluido
   // el largo de las barras (antes mostraban tokens pero median plata).
-  const clave = money.show ? 'costUSD' : 'tokens';
+  // Lo mismo si la fuente no registra costo (Codex, Gemini) o el modelo es
+  // gratis (OpenCode con modelos free): mostrar $0 en todo no dice nada.
+  const sinCosto = money.show && !p.byModel.some((m) => (m.costUSD || 0) > 0);
+  const verCosto = money.show && !sinCosto;
+  const clave = verCosto ? 'costUSD' : 'tokens';
   // byProject trae totalTokens; byModel no, trae los sumandos sueltos.
   const tokensDe = (f) => (f.totalTokens != null
     ? f.totalTokens
     : (f.input || 0) + (f.output || 0) + (f.cacheRead || 0) + (f.cacheWrite || 0));
-  const barra = (f) => (money.show ? (f.costUSD || 0) : tokensDe(f)) || 0;
+  const barra = (f) => (verCosto ? (f.costUSD || 0) : tokensDe(f)) || 0;
+  const valorDe = (f) => (verCosto ? fmtUSD(f.costUSD || 0) : fmtTokens(tokensDe(f)));
 
   // El backend ordena SIEMPRE por costo. En modo tokens eso deja de coincidir
   // con lo que se dibuja: tomar el elemento [0] como maximo daba barras de
@@ -220,7 +225,9 @@ export default function Overview({ snap, memory, onGoto }) {
 
   return (
     <div className="grid" style={{ gap: 14 }}>
-      <UsageMeters cached={limits} />
+      {(!snap.provider || snap.provider === 'all' || snap.provider === 'claude') && (
+        <UsageMeters cached={limits} />
+      )}
 
       <div className="row" style={{ gap: 6 }}>
         <span className="dim" style={{ fontSize: 11.5 }}>Periodo</span>
@@ -249,21 +256,48 @@ export default function Overview({ snap, memory, onGoto }) {
         </span>
       </div>
 
+      {snap.providers && snap.providers.filter((x) => x.disponible).length > 1 && (
+        <div className="card">
+          <h3>Fuentes</h3>
+          <div className="row wrap" style={{ gap: 8 }}>
+            {snap.providers.filter((x) => x.disponible).map((x) => (
+              <span
+                key={x.id}
+                className={'chip ' + (snap.provider === x.id ? 'on' : '')}
+                title={`${x.requests} requests leídos`}
+              >
+                <b>{x.label}</b> · {x.sessions} sesiones · {x.conUso ? fmtTokens(x.tokens) : 'sin tokens'}
+                {x.error ? ' · error' : ''}
+              </span>
+            ))}
+          </div>
+          <div className="dim" style={{ fontSize: 11, marginTop: 8 }}>
+            Claude se lee de <code>~/.claude</code>; OpenCode de su SQLite; Codex de sus rollouts;
+            Gemini/Antigravity del índice de conversaciones (sin tokens ni transcripción).
+            {snap.provider !== 'all' && ' El filtro de arriba acota todo el panel a una sola fuente.'}
+            {(snap.provider === 'opencode' || snap.provider === 'codex' || snap.provider === 'gemini') &&
+              ' Límites de uso, MCP, hooks, skills y memorias siguen siendo datos de Claude Code.'}
+          </div>
+        </div>
+      )}
+
       <div className="grid g4">
         <Stat
-          label={(money.show ? 'Costo · ' : 'Tokens · ') + periodLabel}
-          value={money.valor(t.costUSD, t.totalTokens)}
-          sub={`${fmtInt(t.requests)} requests · ${money.unidad}`}
-          hint={money.show
+          label={(verCosto ? 'Costo · ' : 'Tokens · ') + periodLabel}
+          value={verCosto ? fmtUSD(t.costUSD) : fmtTokens(t.totalTokens)}
+          sub={`${fmtInt(t.requests)} requests · ${verCosto ? 'equivalente API (aprox.)' : 'tokens facturados'}`}
+          hint={verCosto
             ? 'Estimado a tarifa API pública. Tu cuenta es por suscripción: sirve para comparar, no es una factura.'
-            : 'Tokens facturados: input + salida + caché leída + caché escrita. Salen del transcript, son exactos.'}
+            : 'Tokens facturados: input + salida + caché leída + caché escrita. Salen del transcript o de la base de cada herramienta, son exactos.'}
         />
         <Stat
           label="Por consulta tuya"
           value={p.userTurns
-            ? money.valor(t.costUSD / p.userTurns, Math.round(t.totalTokens / p.userTurns))
+            ? (verCosto
+              ? fmtUSD(t.costUSD / p.userTurns)
+              : fmtTokens(Math.round(t.totalTokens / p.userTurns)))
             : '—'}
-          sub={`${fmtInt(p.userTurns)} prompts en el período${money.aprox}`}
+          sub={`${fmtInt(p.userTurns)} prompts en el período${verCosto ? ' (aprox.)' : ''}`}
           hint="Total del período dividido por la cantidad de mensajes que escribiste vos."
         />
         <Stat
@@ -282,7 +316,7 @@ export default function Overview({ snap, memory, onGoto }) {
 
       <div className="card">
         <h3>
-          {money.show ? 'Costo equivalente (aprox.)' : 'Tokens facturados'} · {periodLabel}
+          {verCosto ? 'Costo equivalente (aprox.)' : 'Tokens facturados'} · {periodLabel}
           <span className="dim" style={{ textTransform: 'none', letterSpacing: 0, marginLeft: 8 }}>
             {p.granularity === 'hour' ? 'por hora' : 'por dia'}
           </span>
@@ -300,14 +334,14 @@ export default function Overview({ snap, memory, onGoto }) {
               <XAxis dataKey="date" tick={{ fill: '#6b675f', fontSize: 10 }} tickLine={false} axisLine={false}
                 tickFormatter={axisLabel} minTickGap={14} />
               <YAxis tick={{ fill: '#6b675f', fontSize: 10 }} tickLine={false} axisLine={false}
-                tickFormatter={(v) => (money.show ? fmtUSD(v) : fmtTokens(v))} />
+                tickFormatter={(v) => (verCosto ? fmtUSD(v) : fmtTokens(v))} />
               <Tooltip
                 contentStyle={{ background: '#1f1f1d', border: '1px solid #2c2c29', borderRadius: 8, fontSize: 12 }}
                 labelStyle={{ color: '#918c81' }}
                 labelFormatter={(k) => (String(k).includes('T') ? String(k).replace('T', ' ') + ':00' : k)}
                 formatter={(v, n, item) => [
-                  `${money.show ? fmtUSD(v) : fmtTokens(v)} · ${item.payload.requests} requests`,
-                  money.show ? 'equivalente API' : 'tokens facturados',
+                  `${verCosto ? fmtUSD(v) : fmtTokens(v)} · ${item.payload.requests} requests`,
+                  verCosto ? 'equivalente API' : 'tokens facturados',
                 ]}
               />
               <Area type="monotone" dataKey={clave} stroke="#d97757" strokeWidth={2} fill="url(#ovGrad)" />
@@ -315,13 +349,13 @@ export default function Overview({ snap, memory, onGoto }) {
           </ResponsiveContainer>
         </div>
         <div className="dim" style={{ fontSize: 11, marginTop: 6 }}>
-          {money.show ? snap.pricingNote : 'Los tokens salen del transcript: son exactos y no dependen de ninguna tabla de precios.'}
+          {verCosto ? snap.pricingNote : 'Los tokens salen del transcript o de la base de cada herramienta: son exactos y no dependen de ninguna tabla de precios.'}
         </div>
       </div>
 
       <div className="grid g2">
         <div className="card">
-          <h3>Proyectos · {periodLabel}{money.aprox}</h3>
+          <h3>Proyectos · {periodLabel}{verCosto ? ' (aprox.)' : ''}</h3>
           {!filasProyecto.length ? <div className="dim">Sin actividad en el periodo.</div> :
             filasProyecto.map((pr) => (
               <div className="bar-row" key={pr.key}>
@@ -329,13 +363,13 @@ export default function Overview({ snap, memory, onGoto }) {
                 <span className="track">
                   <span className="fill" style={{ width: `${(barra(pr) / maxProyecto) * 100}%` }} />
                 </span>
-                <span className="val">{money.valor(pr.costUSD, pr.totalTokens)}</span>
+                <span className="val">{valorDe(pr)}</span>
               </div>
             ))}
         </div>
 
         <div className="card">
-          <h3>Modelos · {periodLabel}{money.aprox}</h3>
+          <h3>Modelos · {periodLabel}{verCosto ? ' (aprox.)' : ''}</h3>
           {!filasModelo.length ? <div className="dim">Sin actividad en el periodo.</div> :
             filasModelo.map((m, i) => (
               <div className="bar-row" key={m.key}>
@@ -343,13 +377,15 @@ export default function Overview({ snap, memory, onGoto }) {
                 <span className="track">
                   <span className="fill" style={{ width: `${(barra(m) / maxModelo) * 100}%`, background: modelColor(m.label, i) }} />
                 </span>
-                <span className="val">{money.show ? fmtUSD(m.costUSD) : fmtTokens(tokensDe(m))}</span>
+                <span className="val">{valorDe(m)}</span>
               </div>
             ))}
-          <div className="dim" style={{ fontSize: 11, marginTop: 8 }}>
-            Configurado ahora: <b>{snap.config.settings.model || 'default'}</b>
-            {snap.config.settings.effortLevel && ` · effort ${snap.config.settings.effortLevel}`}
-          </div>
+          {(!snap.provider || snap.provider === 'all' || snap.provider === 'claude') && (
+            <div className="dim" style={{ fontSize: 11, marginTop: 8 }}>
+              Configurado ahora: <b>{snap.config.settings.model || 'default'}</b>
+              {snap.config.settings.effortLevel && ` · effort ${snap.config.settings.effortLevel}`}
+            </div>
+          )}
         </div>
       </div>
 

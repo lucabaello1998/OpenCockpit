@@ -143,7 +143,7 @@ const INYECTADO = {
   harness: 'texto que insertó Claude Code',
 };
 
-function Message({ m, vista, money, pedirImagen }) {
+function Message({ m, vista, money, pedirImagen, assistantLabel = 'claude' }) {
   const soloCharla = vista === 'charla';
 
   // Turnos que figuran como tuyos pero los escribió el harness (el SKILL.md
@@ -189,7 +189,7 @@ function Message({ m, vista, money, pedirImagen }) {
     : m.blocks;
   if (!blocks.length) return null;
 
-  const roleLabel = m.role === 'user' ? (m.isToolReturn ? 'resultado' : 'vos') : 'claude';
+  const roleLabel = m.role === 'user' ? (m.isToolReturn ? 'resultado' : 'vos') : assistantLabel;
 
   return (
     <div className="msg" style={m.isSidechain ? { marginLeft: 24, opacity: 0.92 } : null}>
@@ -318,6 +318,9 @@ export default function Conversations({ snap, flash }) {
   // el id del hilo efectivamente cargado, que es el que el main resuelve a un
   // archivo. Coinciden salvo cuando se llego desde un resultado de busqueda.
   const sesionAbierta = (thread && thread.session && thread.session.sessionId) || selected;
+  const assistantLabel = (thread && thread.session && thread.session.provider && thread.session.provider !== 'claude')
+    ? thread.session.providerLabel
+    : 'claude';
   const pedirImagenSesion = useCallback(
     (ref) => window.cockpit.threadImage(sesionAbierta, ref),
     [sesionAbierta]
@@ -397,7 +400,7 @@ export default function Conversations({ snap, flash }) {
           <form onSubmit={runSearch} className="row" style={{ gap: 6 }}>
             <input
               type="search"
-              placeholder="Buscar en todos los transcripts…"
+              placeholder="Buscar en transcripts de Claude…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               style={{ flex: 1 }}
@@ -487,13 +490,20 @@ export default function Conversations({ snap, flash }) {
                 </div>
                 <div className="m">
                   {s.isRemote && <span className="chip info" style={{ fontSize: 10 }}>{s.machineLabel}</span>}
+                  {s.provider && s.provider !== 'claude' && (
+                    <span className="chip alt" style={{ fontSize: 10 }}>{s.providerLabel}</span>
+                  )}
                   <span>{basename(s.cwd)}</span>
                   <span>·</span>
                   <span>{fmtAgo(s.endedAt)}</span>
                   <span>·</span>
                   <span>{s.userTurns} prompts</span>
                   <span>·</span>
-                  <span>{money.valor(s.totals.costUSD, s.totals.totalTokens)}</span>
+                  <span>
+                    {s.costKnown === false
+                      ? (s.totals.totalTokens ? fmtTokens(s.totals.totalTokens) : '—')
+                      : money.valor(s.totals.costUSD, s.totals.totalTokens)}
+                  </span>
                 </div>
                 {s.facets && (
                   <div className="row wrap" style={{ gap: 4, marginTop: 5 }}>
@@ -528,6 +538,7 @@ export default function Conversations({ snap, flash }) {
                   {thread.session.title}
                 </b>
                 <div className="row" style={{ gap: 6 }}>
+                  {(!thread.session.provider || thread.session.provider === 'claude') && (
                   <button
                     className="btn sm primary"
                     onClick={() => setContexto(thread.session)}
@@ -535,6 +546,10 @@ export default function Conversations({ snap, flash }) {
                   >
                     Guardar contexto
                   </button>
+                  )}
+                  {thread.session.provider && thread.session.provider !== 'claude' && (
+                    <span className="chip alt">{thread.session.providerLabel}</span>
+                  )}
                   <button className="btn sm" onClick={(e) => toggleArchivo(e, thread.session.sessionId)}>
                     {archivedSet.has(thread.session.sessionId) ? 'Desarchivar' : 'Archivar'}
                   </button>
@@ -542,12 +557,16 @@ export default function Conversations({ snap, flash }) {
                     <span className="chip info">{thread.session.machineLabel}</span>
                   ) : (
                     <>
-                      <button className="btn sm" onClick={() => window.cockpit.revealPath(thread.session.file)}>
-                        Ver archivo
-                      </button>
-                      <button className="btn sm" onClick={() => window.cockpit.openPath(thread.session.cwd)}>
-                        Abrir proyecto
-                      </button>
+                      {thread.session.file && (
+                        <button className="btn sm" onClick={() => window.cockpit.revealPath(thread.session.file)}>
+                          Ver archivo
+                        </button>
+                      )}
+                      {thread.session.cwd && (
+                        <button className="btn sm" onClick={() => window.cockpit.openPath(thread.session.cwd)}>
+                          Abrir proyecto
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
@@ -559,9 +578,17 @@ export default function Conversations({ snap, flash }) {
                 <span className="chip">{thread.session.userTurns} prompts</span>
                 <span className="chip">{fmtInt(thread.session.totals.requests)} requests</span>
                 <span className="chip">{fmtTokens(thread.session.totals.totalTokens)} tokens</span>
-                {money.show && (
-                  <span className="chip warn" title="Estimado a tarifa API pública, no es una factura">
-                    {fmtUSD(thread.session.totals.costUSD)} aprox.
+                {money.show && thread.session.costKnown !== false && (
+                  <span className="chip warn" title={thread.session.provider && thread.session.provider !== 'claude'
+                    ? 'Costo real que registra la herramienta'
+                    : 'Estimado a tarifa API pública, no es una factura'}>
+                    {fmtUSD(thread.session.totals.costUSD)}{' '}
+                    {thread.session.provider && thread.session.provider !== 'claude' ? 'real' : 'aprox.'}
+                  </span>
+                )}
+                {thread.session.costKnown === false && (
+                  <span className="chip dim" title="Esta herramienta no guarda el costo; sólo los tokens">
+                    sin costo registrado
                   </span>
                 )}
                 {thread.session.meta && <span className="chip">{fmtDuration(thread.session.meta.durationMinutes)}</span>}
@@ -654,6 +681,14 @@ export default function Conversations({ snap, flash }) {
                     el contenido de las conversaciones nunca se sincroniza. Abrí la app allá para leerla.
                   </div>
                 </div>
+              ) : thread.threadUnavailable ? (
+                <div className="empty" style={{ maxWidth: 520, margin: '40px auto' }}>
+                  <b>{thread.session.providerLabel}</b> todavía no expone la transcripción de forma legible.
+                  <div className="dim" style={{ marginTop: 10, fontSize: 12, lineHeight: 1.7 }}>
+                    Se listan la sesión, el proyecto y la fecha. El contenido de los mensajes queda
+                    en el formato interno (protobuf) de esa herramienta, así que no se inventa nada acá.
+                  </div>
+                </div>
               ) : !visibles.length ? (
                 <div className="empty">
                   Esta sesión no tiene mensajes de conversación.
@@ -669,7 +704,7 @@ export default function Conversations({ snap, flash }) {
                     </div>
                   )}
                   {dibujados.map((m) => (
-                    <Message key={m.i} m={m} vista={vista} money={money} pedirImagen={pedirImagenSesion} />
+                    <Message key={m.i} m={m} vista={vista} money={money} pedirImagen={pedirImagenSesion} assistantLabel={assistantLabel} />
                   ))}
                 </>
               )}

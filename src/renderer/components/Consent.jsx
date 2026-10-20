@@ -11,6 +11,9 @@ const LEE = [
   ['~/.claude/settings.json', 'Modelo, nivel de effort y hooks configurados.'],
   ['~/.claude/usage-data/', 'Métricas por sesión y el análisis que genera Claude Code al cerrarlas.'],
   ['~/.claude/.credentials.json', 'SOLO cuando apretás "Actualizar uso": se lee el token para consultar tus límites en vivo. No se guarda ni se copia a ningún lado.'],
+  ['~/.local/share/opencode/opencode.db', 'Sesiones, mensajes, tokens y costo real que registra OpenCode. Se abre en modo solo lectura.'],
+  ['~/.codex/sessions/**/rollout-*.jsonl', 'Conversaciones y uso de tokens de Codex, más los títulos de ~/.codex/state_5.sqlite.'],
+  ['~/.gemini/antigravity/conversation_summaries.db', 'Índice de conversaciones de Gemini/Antigravity: título, proyecto y fecha. El contenido no es legible sin el esquema protobuf, así que no se muestra.'],
 ];
 
 export default function Consent({ onAccept, flash }) {
@@ -66,7 +69,8 @@ export default function Consent({ onAccept, flash }) {
         </div>
 
         <p style={{ fontSize: 12.5, marginTop: 0, color: 'var(--muted)' }}>
-          Claude Cockpit lee los archivos que Claude Code deja en tu disco y los muestra en pantalla.
+          OpenCockpit lee los archivos que dejan las herramientas de IA en tu disco
+          (Claude Code, OpenCode, Codex y Gemini/Antigravity) y los muestra en pantalla.
           <b style={{ color: 'var(--text)' }}> Todo se procesa en esta máquina y nada se manda a ningún
           servidor</b>, con una sola excepción que está marcada abajo.
         </p>

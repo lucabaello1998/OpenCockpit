@@ -77,7 +77,9 @@ export default function Tokens({ snap }) {
   const cachePct = Math.round((t.cacheRead / Math.max(1, t.totalTokens)) * 100);
   const rangeLabel = RANGES.find((r) => r.key === rangeKey).label;
   // Sin precios no tiene sentido graficar dolares: se cae a tokens.
-  const metricaEfectiva = money.show ? metric : (metric === 'costUSD' ? 'tokens' : metric);
+  // Tampoco si la fuente no registra costo (Codex/Gemini) o el modelo es gratis.
+  const verCosto = money.show && p.byModel.some((m) => (m.costUSD || 0) > 0);
+  const metricaEfectiva = verCosto ? metric : (metric === 'costUSD' ? 'tokens' : metric);
   const metricDef = METRICS.find((m) => m.id === metricaEfectiva);
   const ahorro = t.costNoCacheUSD - t.costUSD;
   const ahorroPct = Math.round((1 - t.costUSD / Math.max(1e-9, t.costNoCacheUSD)) * 100);
@@ -103,13 +105,13 @@ export default function Tokens({ snap }) {
       <div className="grid g5">
         <div className="card stat" title="Costo total del periodo dividido por los mensajes que escribiste vos">
           <div className="label">Por consulta tuya</div>
-          <div className="value">{p.userTurns ? money.valor(t.costUSD / p.userTurns, Math.round(t.totalTokens / p.userTurns)) : '—'}</div>
-          <div className="sub">promedio sobre {fmtInt(p.userTurns)} prompts{money.aprox}</div>
+          <div className="value">{p.userTurns ? (verCosto ? fmtUSD(t.costUSD / p.userTurns) : fmtTokens(Math.round(t.totalTokens / p.userTurns))) : '-'}</div>
+          <div className="sub">promedio sobre {fmtInt(p.userTurns)} prompts{verCosto ? ' (aprox.)' : ''}</div>
         </div>
         <div className="card stat" title="Un prompt tuyo dispara muchos requests: cada uso de herramienta es uno mas">
           <div className="label">Por request al modelo</div>
-          <div className="value">{t.requests ? money.valor(t.costUSD / t.requests, Math.round(t.totalTokens / t.requests)) : '—'}</div>
-          <div className="sub">{fmtInt(t.requests)} llamadas{money.aprox}</div>
+          <div className="value">{t.requests ? (verCosto ? fmtUSD(t.costUSD / t.requests) : fmtTokens(Math.round(t.totalTokens / t.requests))) : '-'}</div>
+          <div className="sub">{fmtInt(t.requests)} llamadas{verCosto ? ' (aprox.)' : ''}</div>
         </div>
         <div className="card stat" title="Porcentaje de tokens que fueron relectura del contexto ya cacheado, facturados a 1/10">
           <div className="label">Lectura de caché</div>
@@ -122,8 +124,8 @@ export default function Tokens({ snap }) {
           <div className="sub">se paga 1.25×–2× el input</div>
         </div>
         <div className="card stat" title="Los subagentes y los agentes de workflow tienen transcripts propios: este es su gasto dentro del periodo">
-          <div className="label">{money.show ? 'Gasto de subagentes' : 'Peso de subagentes'}</div>
-          <div className="value">{money.show ? fmtUSD(t.agentCostUSD) : Math.round((t.agentCostUSD / Math.max(1e-9, t.costUSD)) * 100) + '%'}</div>
+          <div className="label">{verCosto ? 'Gasto de subagentes' : 'Peso de subagentes'}</div>
+          <div className="value">{verCosto ? fmtUSD(t.agentCostUSD) : Math.round((t.agentCostUSD / Math.max(1e-9, t.costUSD)) * 100) + '%'}</div>
           <div className="sub">
             {t.costUSD ? Math.round((t.agentCostUSD / t.costUSD) * 100) : 0}% del total del período
           </div>
@@ -135,7 +137,7 @@ export default function Tokens({ snap }) {
           <h3 style={{ margin: 0 }}>Actividad · {rangeLabel}</h3>
           <div className="right row" style={{ gap: 6 }}>
             <select value={metricaEfectiva} onChange={(e) => setMetric(e.target.value)}>
-              {METRICS.filter((m) => money.show || m.id !== 'costUSD')
+              {METRICS.filter((m) => verCosto || m.id !== 'costUSD')
                 .map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
             </select>
           </div>
@@ -189,8 +191,8 @@ export default function Tokens({ snap }) {
             </div>
           ))}
           <div className="dim" style={{ fontSize: 11, marginTop: 10 }}>
-            El grueso es caché: Claude Code reenvía el contexto en cada request pero lo paga a 1/10.
-            {money.show
+            El grueso es caché: la herramienta reenvía el contexto en cada request pero lo paga a 1/10.
+            {verCosto
               ? `Sin prompt caching este mismo tráfico habría costado ${fmtUSD(t.costNoCacheUSD)} (aprox.): el caché te ahorró ${fmtUSD(ahorro)}, un ${ahorroPct}%.`
               : `Sin prompt caching se habrían facturado los mismos tokens pero a tarifa de input completa: el caché evita pagar ${ahorroPct}% de más.`}
           </div>
@@ -205,7 +207,7 @@ export default function Tokens({ snap }) {
                   <th>Modelo</th>
                   <th className="n">Requests</th>
                   <th className="n">Tokens</th>
-                  <th className="n">{money.show ? 'Equivalente (aprox.)' : 'Sin precios'}</th>
+                  <th className="n">{verCosto ? 'Equivalente (aprox.)' : 'Sin precios'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -218,7 +220,7 @@ export default function Tokens({ snap }) {
                     </td>
                     <td className="n">{fmtInt(m.requests)}</td>
                     <td className="n">{fmtTokens(m.input + m.output + m.cacheRead + m.cacheWrite)}</td>
-                    <td className="n">{money.show ? fmtUSD(m.costUSD) : '—'}</td>
+                    <td className="n">{verCosto ? fmtUSD(m.costUSD) : '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -250,7 +252,7 @@ export default function Tokens({ snap }) {
               <th className="n">Requests</th>
               <th className="n">Tokens</th>
               <th className="n">Agentes</th>
-              <th className="n">{money.show ? 'Equivalente' : 'Tokens'}</th>
+              <th className="n">Costo</th>
               <th className="n">Por prompt</th>
             </tr>
           </thead>
@@ -262,6 +264,7 @@ export default function Tokens({ snap }) {
                   <div className="dim" style={{ fontSize: 11 }}>
                     {fmtDate(s.endedAt)}
                     {s.isRemote && ' · ' + s.machineLabel}
+                    {s.provider && s.provider !== 'claude' && ' · ' + s.providerLabel}
                   </div>
                 </td>
                 <td className="trunc" style={{ maxWidth: 150 }} title={s.cwd}>{basename(s.cwd)}</td>
@@ -269,10 +272,10 @@ export default function Tokens({ snap }) {
                 <td className="n">{fmtInt(s.totals.requests)}</td>
                 <td className="n">{fmtTokens(s.totals.totalTokens)}</td>
                 <td className="n">{s.agents ? (s.agents.count || '—') : '—'}</td>
-                <td className="n"><b>{money.valor(s.totals.costUSD, s.totals.totalTokens)}</b></td>
+                <td className="n"><b>{verCosto ? fmtUSD(s.totals.costUSD) : '—'}</b></td>
                 <td className="n dim">
-                  {s.userTurns
-                    ? money.valor(s.totals.costUSD / s.userTurns, Math.round(s.totals.totalTokens / s.userTurns))
+                  {verCosto && s.userTurns
+                    ? fmtUSD(s.totals.costUSD / s.userTurns)
                     : '—'}
                 </td>
               </tr>

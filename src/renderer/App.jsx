@@ -25,6 +25,9 @@ const TABS = [
 export default function App() {
   const [tab, setTab] = useState('overview');
   const [snap, setSnap] = useState(null);
+  // Filtro por herramienta: 'all' | 'claude' | 'opencode' | 'codex' | 'gemini'.
+  // El proceso principal arma un snapshot por proveedor; aca solo se elige.
+  const [provider, setProvider] = useState('all');
   const [memory, setMemory] = useState(null);
   const [busy, setBusy] = useState(true);
   const [toast, setToast] = useState(null);
@@ -48,7 +51,7 @@ export default function App() {
 
   const load = useCallback(async (announce) => {
     try {
-      const [s, m] = await Promise.all([window.cockpit.snapshot(), window.cockpit.memory()]);
+      const [s, m] = await Promise.all([window.cockpit.snapshot(provider), window.cockpit.memory()]);
       setSnap(s);
       setMemory(m);
       setLastUpdate(new Date().toISOString());
@@ -58,7 +61,7 @@ export default function App() {
     } finally {
       setBusy(false);
     }
-  }, [flash]);
+  }, [flash, provider]);
 
   // El repaso se arma una vez por dia; aca solo se cuenta para el globito.
   useEffect(() => {
@@ -115,7 +118,7 @@ export default function App() {
       <aside className="sidebar">
         <div className="brand">
           <span className="dot" />
-          <b>Claude Cockpit</b>
+          <b>OpenCockpit</b>
         </div>
 
         {TABS.map((t) => (
@@ -159,6 +162,27 @@ export default function App() {
         <div className="topbar">
           <h1>{active.label}</h1>
           <div className="spacer" />
+          {snap && snap.providers && snap.providers.some((p) => p.disponible) && (
+            <div className="row" style={{ gap: 4 }}>
+              <button
+                className={'chip ' + (provider === 'all' ? 'on' : 'dim')}
+                onClick={() => setProvider('all')}
+                title="Sumar todas las herramientas"
+              >
+                Todo
+              </button>
+              {snap.providers.filter((p) => p.disponible).map((p) => (
+                <button
+                  key={p.id}
+                  className={'chip ' + (provider === p.id ? 'on' : 'dim')}
+                  onClick={() => setProvider(p.id)}
+                  title={`${p.sessions} sesiones · ${p.requests} requests${p.conUso ? '' : ' · sin tokens'}`}
+                >
+                  {p.label} {p.sessions}
+                </button>
+              ))}
+            </div>
+          )}
           {snap && (
             <span className="chip dim">
               {snap.counts.sessions} sesiones · {snap.counts.requests.toLocaleString('es-AR')} requests
@@ -185,7 +209,7 @@ export default function App() {
 
         <div className={'content' + (tab === 'chats' ? ' flush' : '')}>
           {!snap ? (
-            <div className="empty"><span className="spin" /> Leyendo ~/.claude…</div>
+            <div className="empty"><span className="spin" /> Leyendo datos locales…</div>
           ) : tab === 'repaso' ? (
             <Repaso flash={flash} onIr={(destino) => {
               // Los consejos apuntan a una sección: "hooks" y "workflows" son
