@@ -916,11 +916,14 @@ console.log('\n-- ronda 11: requisitos --');
   const req = require(B + 'src/main/requisitos.cjs');
 
   const est = req.estado();
-  esperar('se listan los tres requisitos', est.length === 3, String(est.length));
+  // Los requisitos los declara el modulo: si se agrega uno nuevo (Jira fue el
+  // ultimo), este chequeo no tiene que quedar viejo.
+  esperar('se listan todos los requisitos declarados', est.length === req.REQUISITOS.length, String(est.length));
   esperar('cada uno dice para que sirve', est.every((r) => r.habilita && r.habilita.length > 20));
   esperar('se detecta lo que ya esta instalado', est.some((r) => r.detectado));
+  // El skill no es un servidor: "de donde sale" solo aplica a los MCP.
   esperar('y se dice de donde sale el servidor',
-    est.filter((r) => r.detectado).every((r) => !!r.alcance));
+    est.filter((r) => r.detectado && r.tipo === 'mcp').every((r) => !!r.alcance));
 
   // El token de Azure DevOps va en base64 de "usuario:token": pedirle eso al
   // usuario seria una trampa, asi que se acepta el token crudo y se codifica.
