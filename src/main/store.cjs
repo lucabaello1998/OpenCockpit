@@ -8,6 +8,7 @@ const memorySrc = require('./sources/memory.cjs');
 const pricing = require('./sources/pricing.cjs');
 const digest = require('./digest.cjs');
 const seguro = require('./safePaths.cjs');
+const proveedores = require('./sources/providers/index.cjs');
 const { P, statSafe } = require('./sources/paths.cjs');
 
 // Subir esto invalida la cache en disco: hacerlo cada vez que cambia
@@ -24,6 +25,11 @@ class Store {
     this.settings = settings || { get: () => ({}) };
     this.identity = digest.identity();
     this.snapshot = null;
+    // Un snapshot por proveedor (all / claude / opencode / codex / gemini).
+    // Comparten las filas ya parseadas; lo unico que se recalcula son los
+    // agregados (periodos, graficos, rollups).
+    this.snapshots = new Map();
+    this.externos = null;
     this.building = null;
     this.lastBuiltAt = null;
     this._loadCache();
@@ -104,7 +110,10 @@ class Store {
       // la del disco seguia inflada, y el proximo arranque la volvia a leer.
       if (reparsed || podados) this._saveCache();
       this.loadRemote();
-      this.snapshot = this._build();
+      this.snapshots.clear();
+      this.externos = proveedores.collect();
+      this.snapshot = this._build('all');
+      this.snapshots.set('all', this.snapshot);
       this.lastBuiltAt = Date.now();
       let published = null;
       if (this.settings.get().autoPublish) {
@@ -116,7 +125,7 @@ class Store {
     try { return await this.building; } finally { this.building = null; }
   }
 
-  _build() {
+  _build(provider = 'all') {
     const localLabel = this.machineLabel();
     const all = [...this.summaries.values()];
 
@@ -143,7 +152,7 @@ class Store {
 
     const ud = usageData.readAll();
 
-    const rows = sessions.map((s) => {
+    let rows = sessions.map((s) => {
       const kids = byParent.get(s.sessionId) || [];
       const kidTotals = transcripts.totalsOf(kids.flatMap((k) => reqsDe.get(k.file) || []));
       const propios = totalesDe(s);
@@ -152,6 +161,11 @@ class Store {
       const facets = ud.facets.get(s.sessionId) || null;
       return {
         sessionId: s.sessionId,
+        provider: 'claude',
+        providerLabel: 'Claude Code',
+        hasThread: true,
+        hasUsage: true,
+        costKnown: true,
         file: s.file,
         projectDir: s.projectDir,
         machineId: this.identity.machineId,
@@ -184,17 +198,47 @@ class Store {
       };
     });
 
-    const requests = [];
+    // --- otros proveedores (OpenCode, Codex, Gemini) ------------------------
+    // Ya vienen normalizados a la misma forma que las filas de Claude. Los
+    // totales se recalculan aca con las mismas reglas (deduplicacion por
+    // request, sidechain = agente) para que los numeros sean comparables.
+    const ext = this.externos || (this.externos = proveedores.collect());
+    const reqsPorSesion = new Map();
+    for (const r of ext.requests) {
+      if (!reqsPorSesion.has(r.sessionId)) reqsPorSesion.set(r.sessionId, []);
+      reqsPorSesion.get(r.sessionId).push(r);
+    }
+    for (const s of ext.sessions) {
+      const propios = reqsPorSesion.get(s.sessionId) || [];
+      s.own = transcripts.totalsOf(propios);
+      s.totals = transcripts.totalsOf(propios);
+      s.agents = Object.assign(
+        { count: 0, subagents: 0, workflowAgents: 0, workflows: [], totals: null },
+        s.agents
+      );
+      s.agents.totals = transcripts.totalsOf(propios.filter((r) => r.from !== 'session'));
+      s.machineId = this.identity.machineId;
+      s.machineLabel = localLabel;
+      s.isRemote = false;
+      s.projectKey = projectKey(s.cwd || s.providerLabel);
+      s.meta = null;
+      s.facets = null;
+      rows.push(s);
+    }
+
+    let requests = [];
     for (const s of all) {
       for (const r of reqsDe.get(s.file) || []) {
         requests.push(Object.assign({
           sessionId: s.parentSessionId || s.sessionId,
           from: s.kind,
+          provider: 'claude',
           machineId: this.identity.machineId,
           machineLabel: localLabel,
         }, r));
       }
     }
+    requests.push(...ext.requests);
 
     // --- otras maquinas -----------------------------------------------------
     const machines = [{
@@ -210,10 +254,15 @@ class Store {
 
     for (const entry of this.remote) {
       const d = entry.digest;
-      const remoteRequests = digest.decodeRequests(d);
+      const remoteRequests = digest.decodeRequests(d).map((r) => Object.assign({ provider: 'claude' }, r));
       for (const r of remoteRequests) requests.push(r);
       for (const rs of d.sessions || []) {
         rows.push(Object.assign({}, rs, {
+          provider: 'claude',
+          providerLabel: 'Claude Code',
+          hasThread: false,
+          hasUsage: true,
+          costKnown: true,
           file: null,
           projectDir: null,
           machineId: d.machineId,
@@ -233,6 +282,38 @@ class Store {
         redacted: !!d.redacted,
         file: entry.file,
       });
+    }
+
+    const claudeRequests = requests.filter((r) => r.provider === 'claude');
+    const providersInfo = [{
+      id: 'claude',
+      label: 'Claude Code',
+      disponible: this.summaries.size > 0 || !!statSafe(P.CLAUDE_DIR),
+      sessions: rows.filter((r) => r.provider === 'claude').length,
+      requests: claudeRequests.length,
+      conUso: true,
+      conConversaciones: true,
+      error: null,
+    }, ...ext.providers].map((p) => {
+      const reqs = requests.filter((r) => r.provider === p.id);
+      return Object.assign({}, p, {
+        costUSD: reqs.reduce((a, r) => a + (Number(r.costUSD) || 0), 0),
+        tokens: reqs.reduce((a, r) => a + r.input + r.output + r.cacheRead + (r.cacheWriteTotal || 0), 0),
+      });
+    });
+
+    // El filtro de proveedor se aplica sobre lo ya construido: listas,
+    // periodos, graficos y totales salen siempre del mismo conjunto.
+    const corresponde = (x) => provider === 'all' || x.provider === provider;
+    rows = rows.filter(corresponde);
+    requests = requests.filter(corresponde);
+
+    if (provider !== 'all' && provider !== 'claude') {
+      machines.length = 0;
+    } else {
+      machines[0].sessions = rows.length;
+      machines[0].requests = requests.length;
+      machines[0].transcriptBytes = rows.reduce((a, r) => a + (r.sizeBytes || 0), 0);
     }
 
     rows.sort((a, b) => String(b.endedAt || '').localeCompare(String(a.endedAt || '')));
@@ -256,6 +337,8 @@ class Store {
 
     return {
       builtAt: new Date().toISOString(),
+      provider,
+      providers: providersInfo,
       machines,
       remoteErrors: this.remoteErrors,
       syncDir: this.settings.get().syncDir || null,
@@ -278,23 +361,27 @@ class Store {
       totals: transcripts.totalsOf(requests),
       counts: {
         sessions: rows.length,
-        localSessions: sessions.length,
-        subagentTranscripts: children.length,
+        localSessions: rows.filter((r) => !r.isRemote).length,
+        subagentTranscripts: provider === 'all' || provider === 'claude' ? children.length : 0,
         requests: requests.length,
-        diskBytes: all.reduce((a, s) => a + s.size, 0),
+        diskBytes: rows.reduce((a, r) => a + (r.sizeBytes || 0), 0),
       },
       config: cfg,
       reports: ud.reports,
       pricing: pricing.info(),
       pricingNote:
-        'Costo = equivalente a tarifa API publica. Tu cuenta es por suscripcion, ' +
-        'asi que sirve para comparar sesiones, no como factura. El limite real son los medidores 5h / 7d.',
+        'Costo = equivalente a tarifa API publica. Claude se estima con la tabla de precios; ' +
+        'OpenCode trae el costo real que registra; Codex y Gemini no exponen costo. ' +
+        'El limite real de Claude son los medidores 5h / 7d.',
     };
   }
 
-  async getSnapshot() {
+  async getSnapshot(provider = 'all') {
     if (!this.snapshot) await this.refresh();
-    return this.snapshot;
+    if (!this.snapshots.has(provider)) {
+      this.snapshots.set(provider, this._build(provider));
+    }
+    return this.snapshots.get(provider);
   }
 
   // El proceso principal inyecta aca su generador de miniaturas (nativeImage).
@@ -304,6 +391,16 @@ class Store {
     const snap = await this.getSnapshot();
     const row = snap.sessions.find((s) => s.sessionId === sessionId);
     if (!row) return null;
+
+    // Sesiones de otros proveedores: se leen de su propio formato a demanda.
+    if (row.provider && row.provider !== 'claude') {
+      const messages = await proveedores.hilo(row);
+      if (!messages) {
+        return { session: row, messages: [], agents: [], threadUnavailable: true };
+      }
+      return { session: row, messages, agents: [] };
+    }
+
     if (row.isRemote || !row.file) {
       // El digest trae los numeros, no las conversaciones: el transcript vive
       // en la otra maquina y a proposito nunca se sincroniza.

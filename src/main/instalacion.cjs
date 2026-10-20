@@ -4,6 +4,7 @@ const path = require('path');
 const { execFile } = require('child_process');
 const { P, readJSON, statSafe } = require('./sources/paths.cjs');
 const transcripts = require('./sources/transcripts.cjs');
+const proveedores = require('./sources/providers/index.cjs');
 
 // En que estado esta la maquina antes de poder mostrar algo.
 //
@@ -39,8 +40,14 @@ async function estado() {
   const hayCarpeta = !!statSafe(P.CLAUDE_DIR);
   const hayConfig = !!statSafe(P.CLAUDE_JSON);
   const cli = await buscarCli();
+  // OpenCockpit no depende de Claude: si hay datos de otra herramienta,
+  // arranca igual y muestra lo que tenga.
+  const otras = proveedores.modulos.some((m) => {
+    try { return m.disponible(); } catch { return false; }
+  });
 
   if (!hayCarpeta && !hayConfig) {
+    if (otras) return { estado: ESTADOS.LISTO, cli, otras: true, transcripts: 0 };
     return {
       estado: ESTADOS.SIN_CLAUDE,
       cli,
@@ -50,7 +57,7 @@ async function estado() {
       detalle: cli
         ? 'El comando existe en ' + cli + ', pero todavía no creó su carpeta de configuración. ' +
           'Abrí una terminal, ejecutá `claude` una vez y volvé acá.'
-        : 'Claude Cockpit no reemplaza a Claude Code: lo lee. Primero hay que instalarlo y usarlo un rato.',
+        : 'OpenCockpit no reemplaza a Claude Code: lo lee. Primero hay que instalarlo y usarlo un rato.',
       pasos: cli
         ? [{ texto: 'Ejecutá `claude` en una terminal e iniciá sesión', comando: 'claude' }]
         : [
@@ -82,6 +89,7 @@ async function estado() {
   try { cuantos = transcripts.listTranscriptFiles().length; } catch { cuantos = 0; }
 
   if (!cuantos) {
+    if (otras) return { estado: ESTADOS.LISTO, cli, otras: true, transcripts: 0 };
     return {
       estado: ESTADOS.SIN_DATOS,
       cli,

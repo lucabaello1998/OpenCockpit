@@ -54,7 +54,7 @@ function createWindow() {
     minWidth: 1000,
     minHeight: 640,
     backgroundColor: '#0f0f0e',
-    title: 'Claude Cockpit',
+    title: 'OpenCockpit',
     // En el .exe empaquetado Windows usa el icono del ejecutable, pero en
     // desarrollo (y en Linux) la ventana quedaba con el de Electron.
     icon: iconoDeVentana(),
@@ -157,6 +157,10 @@ function startWatching() {
       P.history,
       P.workflows,
       P.skills,
+      P.opencodeDb,
+      P.opencodeWal,
+      P.codexSessions,
+      P.geminiSummaries,
     ],
     {
       ignoreInitial: true,
@@ -205,7 +209,7 @@ function handle(channel, fn) {
   });
 }
 
-handle('snapshot', () => store.getSnapshot());
+handle('snapshot', (provider) => store.getSnapshot(provider || 'all'));
 handle('refresh', async () => {
   await store.refresh();
   return store.getSnapshot();
@@ -573,7 +577,7 @@ handle('pkgExport', async (incluir) => {
   const r = await dialog.showSaveDialog(win, {
     title: 'Guardar el paquete',
     defaultPath: `claude-setup-${store.machineLabel()}.cockpitpkg.json`,
-    filters: [{ name: 'Paquete de Claude Cockpit', extensions: ['json'] }],
+    filters: [{ name: 'Paquete de OpenCockpit', extensions: ['json'] }],
   });
   if (r.canceled || !r.filePath) return null;
   require('fs').writeFileSync(r.filePath, JSON.stringify(p, null, 2));
@@ -584,7 +588,7 @@ handle('pkgOpen', async () => {
   const r = await dialog.showOpenDialog(win, {
     title: 'Elegir un paquete',
     properties: ['openFile'],
-    filters: [{ name: 'Paquete de Claude Cockpit', extensions: ['json'] }],
+    filters: [{ name: 'Paquete de OpenCockpit', extensions: ['json'] }],
   });
   if (r.canceled || !r.filePaths.length) return null;
   const raw = require('fs').readFileSync(r.filePaths[0], 'utf8');

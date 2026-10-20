@@ -6,11 +6,21 @@ const fs = require('fs');
 const HOME = os.homedir();
 const CLAUDE_DIR = process.env.CLAUDE_CONFIG_DIR || path.join(HOME, '.claude');
 const CLAUDE_JSON = path.join(HOME, '.claude.json');
+const OPENCODE_DIR = process.env.OPENCODE_DATA_DIR || path.join(HOME, '.local', 'share', 'opencode');
+const CODEX_DIR = process.env.CODEX_HOME || path.join(HOME, '.codex');
+const GEMINI_DIR = process.env.GEMINI_HOME || path.join(HOME, '.gemini');
 
 const P = {
   HOME,
   CLAUDE_DIR,
   CLAUDE_JSON,
+  OPENCODE_DIR,
+  CODEX_DIR,
+  GEMINI_DIR,
+  opencodeDb: path.join(OPENCODE_DIR, 'opencode.db'),
+  opencodeWal: path.join(OPENCODE_DIR, 'opencode.db-wal'),
+  codexSessions: path.join(CODEX_DIR, 'sessions'),
+  geminiSummaries: path.join(GEMINI_DIR, 'antigravity', 'conversation_summaries.db'),
   projects: path.join(CLAUDE_DIR, 'projects'),
   usageData: path.join(CLAUDE_DIR, 'usage-data'),
   sessionMeta: path.join(CLAUDE_DIR, 'usage-data', 'session-meta'),

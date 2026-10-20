@@ -97,6 +97,7 @@ const HARNESS_TAGS = [
   'command-message', 'command-name', 'command-args',
   'local-command-stdout', 'local-command-stderr',
   'user-prompt-submit-hook', 'session-start-hook', 'task-notification',
+  'environment_context', 'user_instructions',
 ].join('|');
 
 // Se arman con RegExp() a proposito: un literal con backreferences se rompe

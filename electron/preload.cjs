@@ -8,7 +8,7 @@ const call = (channel, ...args) =>
   });
 
 contextBridge.exposeInMainWorld('cockpit', {
-  snapshot: () => call('snapshot'),
+  snapshot: (provider) => call('snapshot', provider),
   refresh: () => call('refresh'),
   session: (id, opts) => call('session', id, opts),
   threadImage: (id, ref) => call('threadImage', id, ref),
