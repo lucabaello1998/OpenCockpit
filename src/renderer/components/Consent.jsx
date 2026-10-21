@@ -14,6 +14,9 @@ const LEE = [
   ['~/.local/share/opencode/opencode.db', 'Sesiones, mensajes, tokens y costo real que registra OpenCode. Se abre en modo solo lectura.'],
   ['~/.codex/sessions/**/rollout-*.jsonl', 'Conversaciones y uso de tokens de Codex, más los títulos de ~/.codex/state_5.sqlite.'],
   ['~/.gemini/antigravity/conversation_summaries.db', 'Índice de conversaciones de Gemini/Antigravity: título, proyecto y fecha. El contenido no es legible sin el esquema protobuf, así que no se muestra.'],
+  ['%APPDATA%/Code/…/github.copilot-chat/session-store.db', 'Sesiones y turnos de GitHub Copilot Chat. Copilot no registra tokens ni costo: se listan las conversaciones, sin sumar al uso.'],
+  ['%APPDATA%/Cursor/User/globalStorage/state.vscdb', 'Conversaciones de Cursor (composerData y bubbleId). Si Cursor guardó tokens, se suman; si no, la sesión se lista sin uso.'],
+  ['%APPDATA%/Code/…/saoudrizwan.claude-dev/tasks/', 'Tareas de Cline y Roo Code: mensajes, tokens, caché y costo que registra cada extensión.'],
 ];
 
 export default function Consent({ onAccept, flash }) {
@@ -70,7 +73,7 @@ export default function Consent({ onAccept, flash }) {
 
         <p style={{ fontSize: 12.5, marginTop: 0, color: 'var(--muted)' }}>
           OpenCockpit lee los archivos que dejan las herramientas de IA en tu disco
-          (Claude Code, OpenCode, Codex y Gemini/Antigravity) y los muestra en pantalla.
+          (Claude Code, OpenCode, Codex, Gemini/Antigravity, Copilot, Cursor y Cline/Roo) y los muestra en pantalla.
           <b style={{ color: 'var(--text)' }}> Todo se procesa en esta máquina y nada se manda a ningún
           servidor</b>, con una sola excepción que está marcada abajo.
         </p>

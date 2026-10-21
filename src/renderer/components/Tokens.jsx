@@ -165,7 +165,7 @@ export default function Tokens({ snap }) {
                   ))}
                 </>
               ) : (
-                <Bar dataKey={metricaEfectiva} fill="#d97757" />
+                <Bar dataKey={metricaEfectiva} fill="var(--accent)" />
               )}
             </BarChart>
           </ResponsiveContainer>

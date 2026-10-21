@@ -104,9 +104,9 @@ export default function PrimerArranque({ info, onListo }) {
         </div>
 
         <div className="dim" style={{ fontSize: 11, marginTop: 14, lineHeight: 1.6, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
-          OpenCockpit no reemplaza a Claude Code ni puede iniciarte sesión: lee lo que
-          Claude Code deja en tu disco. El login lo hace el CLI y guarda el token en tu
-          carpeta; esta app solo lo lee, y solo cuando le pedís actualizar el uso.
+          OpenCockpit no reemplaza a tu asistente ni puede iniciarte sesión: lee lo que
+          deja en tu disco. El login lo hace cada herramienta y guarda sus credenciales en
+          tu carpeta; esta app solo las lee, y solo cuando le pedís actualizar el uso.
         </div>
       </div>
     </div>

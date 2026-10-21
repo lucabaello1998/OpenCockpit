@@ -53,11 +53,13 @@ async function estado() {
       cli,
       titulo: cli
         ? 'Claude Code está instalado, pero nunca se ejecutó en esta máquina'
-        : 'No encontré Claude Code en esta máquina',
+        : 'No encontré ninguna herramienta de IA en esta máquina',
       detalle: cli
         ? 'El comando existe en ' + cli + ', pero todavía no creó su carpeta de configuración. ' +
           'Abrí una terminal, ejecutá `claude` una vez y volvé acá.'
-        : 'OpenCockpit no reemplaza a Claude Code: lo lee. Primero hay que instalarlo y usarlo un rato.',
+        : 'OpenCockpit no reemplaza a tu asistente: lee lo que deja en disco. Instalá y usá ' +
+          'Claude Code, OpenCode, Codex, GitHub Copilot Chat, Cursor, Cline/Roo o Gemini/Antigravity, ' +
+          'y volvé acá.',
       pasos: cli
         ? [{ texto: 'Ejecutá `claude` en una terminal e iniciá sesión', comando: 'claude' }]
         : [

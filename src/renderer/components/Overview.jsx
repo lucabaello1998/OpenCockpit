@@ -61,6 +61,7 @@ function UsageMeters({ cached }) {
     <div className="card">
       <div className="row" style={{ marginBottom: 12 }}>
         <h3 style={{ margin: 0 }}>Límites de uso</h3>
+        <span className="chip dim">Claude Code</span>
         <span className={'chip ' + (isLive ? 'on' : '')}>
           {isLive ? 'en vivo' : 'caché de Claude Code'}
           {shown && shown.fetchedAtMs ? ' · ' + fmtAgo(new Date(shown.fetchedAtMs).toISOString()) : ''}
@@ -273,9 +274,11 @@ export default function Overview({ snap, memory, onGoto }) {
           </div>
           <div className="dim" style={{ fontSize: 11, marginTop: 8 }}>
             Claude se lee de <code>~/.claude</code>; OpenCode de su SQLite; Codex de sus rollouts;
-            Gemini/Antigravity del índice de conversaciones (sin tokens ni transcripción).
+            Gemini/Antigravity del índice de conversaciones (sin tokens ni transcripción);
+            Copilot de <code>session-store.db</code>; Cursor de <code>state.vscdb</code>;
+            Cline/Roo de sus carpetas de tareas.
             {snap.provider !== 'all' && ' El filtro de arriba acota todo el panel a una sola fuente.'}
-            {(snap.provider === 'opencode' || snap.provider === 'codex' || snap.provider === 'gemini') &&
+            {snap.provider !== 'all' && snap.provider !== 'claude' &&
               ' Límites de uso, MCP, hooks, skills y memorias siguen siendo datos de Claude Code.'}
           </div>
         </div>
@@ -326,8 +329,8 @@ export default function Overview({ snap, memory, onGoto }) {
             <AreaChart data={serie} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
               <defs>
                 <linearGradient id="ovGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#d97757" stopOpacity={0.55} />
-                  <stop offset="100%" stopColor="#d97757" stopOpacity={0.02} />
+                  <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.55} />
+                  <stop offset="100%" stopColor="var(--accent)" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="#2c2c29" vertical={false} />
@@ -344,7 +347,7 @@ export default function Overview({ snap, memory, onGoto }) {
                   verCosto ? 'equivalente API' : 'tokens facturados',
                 ]}
               />
-              <Area type="monotone" dataKey={clave} stroke="#d97757" strokeWidth={2} fill="url(#ovGrad)" />
+              <Area type="monotone" dataKey={clave} stroke="var(--accent)" strokeWidth={2} fill="url(#ovGrad)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

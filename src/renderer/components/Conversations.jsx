@@ -14,7 +14,7 @@ const OUTCOME_CHIP = {
 // Qué se muestra del hilo. "Conversación" deja solo lo que se dijeron; el resto
 // (herramientas, resultados, adjuntos del harness) es maquinaria.
 const VISTAS = [
-  { id: 'charla', label: 'Conversación', hint: 'Solo lo que escribiste vos y lo que te contestó Claude' },
+  { id: 'charla', label: 'Conversación', hint: 'Solo lo que escribiste vos y lo que contestó el asistente' },
   { id: 'todo', label: 'Todo', hint: 'Incluye herramientas, resultados y adjuntos internos' },
 ];
 
@@ -140,10 +140,10 @@ const INYECTADO = {
   skill: 'contenido de una skill que se cargó',
   comando: 'comando que ejecutaste (/algo)',
   resumen: 'resumen de la sesión anterior',
-  harness: 'texto que insertó Claude Code',
+  harness: 'texto que insertó la herramienta',
 };
 
-function Message({ m, vista, money, pedirImagen, assistantLabel = 'claude' }) {
+function Message({ m, vista, money, pedirImagen, assistantLabel = 'asistente' }) {
   const soloCharla = vista === 'charla';
 
   // Turnos que figuran como tuyos pero los escribió el harness (el SKILL.md
@@ -320,7 +320,7 @@ export default function Conversations({ snap, flash }) {
   const sesionAbierta = (thread && thread.session && thread.session.sessionId) || selected;
   const assistantLabel = (thread && thread.session && thread.session.provider && thread.session.provider !== 'claude')
     ? thread.session.providerLabel
-    : 'claude';
+    : 'Claude';
   const pedirImagenSesion = useCallback(
     (ref) => window.cockpit.threadImage(sesionAbierta, ref),
     [sesionAbierta]
@@ -400,7 +400,7 @@ export default function Conversations({ snap, flash }) {
           <form onSubmit={runSearch} className="row" style={{ gap: 6 }}>
             <input
               type="search"
-              placeholder="Buscar en transcripts de Claude…"
+              placeholder="Buscar en Claude Code…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               style={{ flex: 1 }}
@@ -456,7 +456,7 @@ export default function Conversations({ snap, flash }) {
                 <div key={i} className="hit" onClick={() => setSelected(h.parentSessionId || h.sessionId)}>
                   <div className="row" style={{ gap: 6, marginBottom: 3 }}>
                     <span className={'msg-role role-' + h.role} style={{ fontSize: 9 }}>
-                      {h.role === 'user' ? 'vos' : 'claude'}
+                      {h.role === 'user' ? 'vos' : 'asistente'}
                     </span>
                     {h.kind !== 'session' && <span className="chip alt" style={{ fontSize: 10 }}>agente</span>}
                     <span className="dim" style={{ fontSize: 10.5 }}>{fmtDate(h.ts)}</span>
@@ -510,7 +510,7 @@ export default function Conversations({ snap, flash }) {
                     <span
                       className={'chip ' + (OUTCOME_CHIP[s.facets.outcome] || '')}
                       style={{ fontSize: 10 }}
-                      title="Cómo terminó la sesión, según el análisis que hace Claude Code al cerrarla"
+                      title="Cómo terminó la sesión, según el análisis local al cerrarla"
                     >
                       {esOutcome(s.facets.outcome)}
                     </span>
@@ -619,7 +619,7 @@ export default function Conversations({ snap, flash }) {
                   <details className="right analisis">
                     <summary
                       className="chip info"
-                      title="Resumen que genera Claude Code al terminar: qué buscabas, si lo lograste y qué se trabó"
+                      title="Resumen que se genera al terminar: qué buscabas, si lo lograste y qué se trabó"
                     >
                       análisis
                     </summary>

@@ -1,7 +1,7 @@
 {
   "name": "opencockpit",
-  "version": "1.0.0",
-  "description": "Dashboard de escritorio multi-herramienta: uso, costos, conversaciones y memorias de Claude Code, OpenCode, Codex y Gemini/Antigravity.",
+  "version": "1.1.0",
+  "description": "Dashboard de escritorio multi-herramienta: uso, costos, conversaciones y memorias de Claude Code, OpenCode, Codex, Gemini/Antigravity, Copilot, Cursor y Cline/Roo.",
   "main": "electron/main.cjs",
   "type": "module",
   "scripts": {

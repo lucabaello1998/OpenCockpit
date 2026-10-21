@@ -1,14 +1,18 @@
 :root {
   --bg: #0e0e0d;
-  --panel: #171716;
-  --panel-2: #1f1f1d;
+  --panel: rgba(23, 23, 22, 0.84);
+  --panel-2: rgba(31, 31, 29, 0.92);
   --line: #2c2c29;
   --line-soft: #232320;
   --text: #f2f0ea;
   --muted: #918c81;
   --dim: #6b675f;
-  --accent: #d97757;
-  --accent-soft: rgba(217, 119, 87, 0.14);
+  --accent: #e0a458;
+  --accent-2: #8ab4f8;
+  --accent-soft: rgba(224, 164, 88, 0.14);
+  --glow-a: 217, 119, 87;
+  --glow-b: 139, 92, 246;
+  --glow-c: 56, 132, 255;
   --green: #7cae7a;
   --blue: #6c9fd8;
   --purple: #a98bd4;
@@ -16,6 +20,37 @@
   --red: #d4756b;
   --radius: 10px;
   color-scheme: dark;
+}
+
+/* Una paleta por herramienta. El filtro del encabezado cambia data-provider
+   y con eso el acento, los degradados y la animacion de fondo. */
+[data-provider="claude"] {
+  --accent: #d97757; --accent-2: #f0b27a; --accent-soft: rgba(217, 119, 87, 0.16);
+  --glow-a: 217, 119, 87; --glow-b: 240, 178, 122; --glow-c: 140, 60, 30;
+}
+[data-provider="opencode"] {
+  --accent: #22c1c3; --accent-2: #4ade80; --accent-soft: rgba(34, 193, 195, 0.15);
+  --glow-a: 34, 193, 195; --glow-b: 74, 222, 128; --glow-c: 14, 116, 144;
+}
+[data-provider="codex"] {
+  --accent: #10b981; --accent-2: #84e1bc; --accent-soft: rgba(16, 185, 129, 0.15);
+  --glow-a: 16, 185, 129; --glow-b: 52, 211, 153; --glow-c: 6, 95, 70;
+}
+[data-provider="gemini"] {
+  --accent: #8b5cf6; --accent-2: #4da3ff; --accent-soft: rgba(139, 92, 246, 0.16);
+  --glow-a: 139, 92, 246; --glow-b: 77, 163, 255; --glow-c: 59, 130, 246;
+}
+[data-provider="copilot"] {
+  --accent: #58a6ff; --accent-2: #2dd4bf; --accent-soft: rgba(88, 166, 255, 0.15);
+  --glow-a: 88, 166, 255; --glow-b: 45, 212, 191; --glow-c: 31, 111, 235;
+}
+[data-provider="cursor"] {
+  --accent: #a8b3cf; --accent-2: #7c8cff; --accent-soft: rgba(168, 179, 207, 0.15);
+  --glow-a: 124, 140, 255; --glow-b: 168, 179, 207; --glow-c: 76, 87, 120;
+}
+[data-provider="cline"] {
+  --accent: #f472b6; --accent-2: #fb923c; --accent-soft: rgba(244, 114, 182, 0.15);
+  --glow-a: 244, 114, 182; --glow-b: 251, 146, 60; --glow-c: 190, 40, 120;
 }
 
 * { box-sizing: border-box; }
@@ -28,6 +63,50 @@ body {
   font: 13px/1.55 ui-sans-serif, system-ui, "Segoe UI", Inter, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
+}
+
+/* Degradado de fondo: toma los colores de la herramienta elegida y se mueve
+   despacio. Va detras de todo (z-index 0) y los paneles son semitransparentes. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 40% at 16% 8%, rgba(var(--glow-a), 0.50), transparent 66%),
+    radial-gradient(36% 36% at 88% 22%, rgba(var(--glow-b), 0.38), transparent 66%),
+    radial-gradient(48% 44% at 58% 102%, rgba(var(--glow-c), 0.32), transparent 70%);
+  filter: blur(44px) saturate(130%);
+  opacity: 0.75;
+  animation: aurora 24s ease-in-out infinite alternate;
+}
+#root { position: relative; z-index: 1; }
+
+@keyframes aurora {
+  0%   { transform: translate3d(-3%, -2%, 0) scale(1); }
+  50%  { transform: translate3d(3%, 2%, 0) scale(1.08) rotate(2deg); }
+  100% { transform: translate3d(-1%, 3%, 0) scale(1.03) rotate(-1deg); }
+}
+
+/* Cambio de herramienta: el contenido entra con un fade corto mientras el
+   degradado de fondo sigue su curso. */
+.theme-fade { animation: themeFade 0.5s ease; }
+@keyframes themeFade {
+  from { opacity: 0.55; filter: blur(2px) saturate(115%); }
+  to   { opacity: 1; filter: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  .theme-fade { animation: none; }
+}
+
+/* Los paneles acompanan el cambio de paleta sin saltar. */
+.sidebar, .topbar, .card, .thread-head, .sess, .block, .chip, .btn,
+.nav-item, .brand .dot, .bar-row .fill {
+  transition: background-color 0.45s ease, border-color 0.45s ease,
+    color 0.45s ease, box-shadow 0.45s ease;
 }
 
 code, pre, .mono {
@@ -70,7 +149,7 @@ code, pre, .mono {
 .nav-item:hover { background: var(--panel-2); color: var(--text); }
 .nav-item.active {
   background: var(--accent-soft); color: var(--text);
-  border-color: rgba(217,119,87,0.28);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .nav-item .badge { margin-left: auto; }
 
@@ -90,6 +169,12 @@ code, pre, .mono {
 }
 .topbar h1 { font-size: 14px; margin: 0; font-weight: 600; letter-spacing: -0.2px; }
 .topbar .spacer { flex: 1; }
+.provider-bar {
+  display: flex; align-items: center; gap: 4px;
+  max-width: 52vw; overflow-x: auto; overflow-y: hidden;
+  padding: 2px 0; scrollbar-width: none;
+}
+.provider-bar::-webkit-scrollbar { display: none; }
 
 .content { flex: 1; overflow: auto; padding: 18px; }
 .content.flush { padding: 0; }
@@ -153,6 +238,21 @@ input:focus, select:focus { border-color: var(--accent); }
 .chip.bad  { color: var(--red);    border-color: rgba(212,117,107,0.35); background: rgba(212,117,107,0.10); }
 .chip.info { color: var(--blue);   border-color: rgba(108,159,216,0.35); background: rgba(108,159,216,0.10); }
 .chip.alt  { color: var(--purple); border-color: rgba(169,139,212,0.35); background: rgba(169,139,212,0.10); }
+
+/* Filtro de herramientas: punto de color propio y estado activo con el acento
+   de la herramienta elegida. */
+.chip.provider { cursor: pointer; user-select: none; }
+.chip.provider:hover { color: var(--text); border-color: var(--dim); }
+.chip.provider.accent {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+  background: var(--accent-soft);
+}
+.pdot {
+  width: 7px; height: 7px; border-radius: 999px;
+  display: inline-block; flex: 0 0 7px;
+  box-shadow: 0 0 6px currentColor;
+}
 
 .muted { color: var(--muted); }
 .dim { color: var(--dim); }

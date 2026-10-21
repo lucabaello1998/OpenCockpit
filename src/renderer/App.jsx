@@ -11,6 +11,7 @@ import Consent from './components/Consent.jsx';
 import Repaso from './components/Repaso.jsx';
 import PrimerArranque from './components/PrimerArranque.jsx';
 import { setShowCosts, useShowCosts } from './money.js';
+import { PROVIDER_COLOR, PROVIDER_SHORT } from './theme.js';
 
 const TABS = [
   { id: 'overview', label: 'Resumen', icon: '◈' },
@@ -62,6 +63,17 @@ export default function App() {
       setBusy(false);
     }
   }, [flash, provider]);
+
+  // Cada herramienta tiene su paleta: el atributo en <html> cambia las
+  // variables CSS y el degradado animado del fondo.
+  useEffect(() => {
+    document.documentElement.dataset.provider = provider;
+    document.body.classList.remove('theme-fade');
+    void document.body.offsetWidth;
+    document.body.classList.add('theme-fade');
+    const t = setTimeout(() => document.body.classList.remove('theme-fade'), 620);
+    return () => clearTimeout(t);
+  }, [provider]);
 
   // El repaso se arma una vez por dia; aca solo se cuenta para el globito.
   useEffect(() => {
@@ -163,22 +175,27 @@ export default function App() {
           <h1>{active.label}</h1>
           <div className="spacer" />
           {snap && snap.providers && snap.providers.some((p) => p.disponible) && (
-            <div className="row" style={{ gap: 4 }}>
+            <div className="provider-bar">
               <button
-                className={'chip ' + (provider === 'all' ? 'on' : 'dim')}
+                className={'chip provider ' + (provider === 'all' ? 'accent' : 'dim')}
                 onClick={() => setProvider('all')}
                 title="Sumar todas las herramientas"
               >
+                <span className="pdot" style={{ background: PROVIDER_COLOR.all, color: '#e0a458' }} />
                 Todo
               </button>
               {snap.providers.filter((p) => p.disponible).map((p) => (
                 <button
                   key={p.id}
-                  className={'chip ' + (provider === p.id ? 'on' : 'dim')}
+                  className={'chip provider ' + (provider === p.id ? 'accent' : 'dim')}
                   onClick={() => setProvider(p.id)}
-                  title={`${p.sessions} sesiones · ${p.requests} requests${p.conUso ? '' : ' · sin tokens'}`}
+                  title={`${p.label}: ${p.sessions} sesiones · ${p.requests} requests${p.conUso ? '' : ' · sin tokens'}`}
                 >
-                  {p.label} {p.sessions}
+                  <span
+                    className="pdot"
+                    style={{ background: PROVIDER_COLOR[p.id] || 'var(--dim)', color: PROVIDER_COLOR[p.id] || 'var(--dim)' }}
+                  />
+                  {PROVIDER_SHORT[p.id] || p.label} {p.sessions}
                 </button>
               ))}
             </div>
@@ -211,7 +228,7 @@ export default function App() {
           {!snap ? (
             <div className="empty"><span className="spin" /> Leyendo datos locales…</div>
           ) : tab === 'repaso' ? (
-            <Repaso flash={flash} onIr={(destino) => {
+            <Repaso provider={provider} flash={flash} onIr={(destino) => {
               // Los consejos apuntan a una sección: "hooks" y "workflows" son
               // pestañas de Configuración, no de la barra lateral.
               if (destino === 'boards') setTab('boards');

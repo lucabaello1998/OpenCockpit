@@ -17,7 +17,7 @@ const CATEGORIAS = {
   setup: { label: 'Podrías configurar', color: '#6c9fd8', orden: 2 },
 };
 
-export default function Repaso({ onIr, flash }) {
+export default function Repaso({ onIr, flash, provider }) {
   const [datos, setDatos] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -63,6 +63,12 @@ export default function Repaso({ onIr, flash }) {
   return (
     <div className="grid" style={{ gap: 14 }}>
       {cabecera}
+
+      {provider && provider !== 'all' && provider !== 'claude' && (
+        <div className="chip warn" style={{ whiteSpace: 'normal', display: 'block' }}>
+          El repaso analiza solo sesiones de Claude Code; el filtro de arriba no cambia sus consejos.
+        </div>
+      )}
 
       <div className="row" style={{ gap: 8 }}>
         <span className="dim" style={{ fontSize: 11.5 }}>

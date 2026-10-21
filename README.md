@@ -19,9 +19,14 @@ herramientas con el mismo panel:
 | **OpenCode** | `~/.local/share/opencode/opencode.db` (SQLite) | Sí | Real, el que registra OpenCode | Sí |
 | **Codex** | `~/.codex/sessions/**/*.jsonl` + `state_5.sqlite` | Sí | No lo registra | Sí |
 | **Gemini / Antigravity** | `~/.gemini/antigravity/conversation_summaries.db` | No | No | No (protobuf) |
+| **GitHub Copilot** | `%APPDATA%/Code/…/github.copilot-chat/session-store.db` | No | No | Sí |
+| **Cursor** | `%APPDATA%/Cursor/User/globalStorage/state.vscdb` | Si Cursor lo guardó | No | Sí |
+| **Cline / Roo Code** | `%APPDATA%/Code/…/saoudrizwan.claude-dev/tasks/` | Sí | Real, el que registra la extensión | Sí |
 
 El **filtro de proveedor** del encabezado acota todo el panel (Resumen, Tokens y
-Conversaciones) a una sola herramienta o suma todas.
+Conversaciones) a una sola herramienta o suma todas. Cada herramienta tiene su
+paleta: al elegirla, el acento y el degradado animado del fondo cambian de color
+(naranja para Claude, azul/violeta para Gemini, verde para Codex, etc.).
 
 ## Instalar
 
