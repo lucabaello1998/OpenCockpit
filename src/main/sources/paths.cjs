@@ -9,6 +9,15 @@ const CLAUDE_JSON = path.join(HOME, '.claude.json');
 const OPENCODE_DIR = process.env.OPENCODE_DATA_DIR || path.join(HOME, '.local', 'share', 'opencode');
 const CODEX_DIR = process.env.CODEX_HOME || path.join(HOME, '.codex');
 const GEMINI_DIR = process.env.GEMINI_HOME || path.join(HOME, '.gemini');
+const VSCODE_GS = process.env.APPDATA
+  ? path.join(process.env.APPDATA, 'Code', 'User', 'globalStorage')
+  : path.join(HOME, '.config', 'Code', 'User', 'globalStorage');
+const COPILOT_DIR = process.env.COPILOT_DIR || path.join(VSCODE_GS, 'github.copilot-chat');
+const CURSOR_DB = process.env.CURSOR_HOME
+  ? path.join(process.env.CURSOR_HOME, 'User', 'globalStorage', 'state.vscdb')
+  : path.join(process.env.APPDATA || path.join(HOME, '.config'), 'Cursor', 'User', 'globalStorage', 'state.vscdb');
+const CLINE_TASKS = path.join(VSCODE_GS, 'saoudrizwan.claude-dev', 'tasks');
+const ROO_TASKS = path.join(VSCODE_GS, 'rooveterinaryinc.roo-cline', 'tasks');
 
 const P = {
   HOME,
@@ -17,6 +26,11 @@ const P = {
   OPENCODE_DIR,
   CODEX_DIR,
   GEMINI_DIR,
+  COPILOT_DIR,
+  CURSOR_DB,
+  CLINE_TASKS,
+  ROO_TASKS,
+  copilotDb: path.join(COPILOT_DIR, 'session-store.db'),
   opencodeDb: path.join(OPENCODE_DIR, 'opencode.db'),
   opencodeWal: path.join(OPENCODE_DIR, 'opencode.db-wal'),
   codexSessions: path.join(CODEX_DIR, 'sessions'),

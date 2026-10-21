@@ -2,12 +2,15 @@
 const opencode = require('./opencode.cjs');
 const codex = require('./codex.cjs');
 const gemini = require('./gemini.cjs');
+const copilot = require('./copilot.cjs');
+const cursor = require('./cursor.cjs');
+const cline = require('./cline.cjs');
 
 // Cada proveedor sabe leer SU formato y devuelve las mismas filas
 // normalizadas que produce el lado Claude (session + request), para que el
 // resto de la app (periodos, graficos, listas) no tenga que saber de donde
 // salieron los datos.
-const modulos = [opencode, codex, gemini];
+const modulos = [opencode, codex, gemini, copilot, cursor, cline];
 
 function collect() {
   const sessions = [];

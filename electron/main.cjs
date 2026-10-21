@@ -1,4 +1,12 @@
 'use strict';
+// El .exe no tiene consola: si stdout/stderr se cierran (por ejemplo, la
+// terminal desde donde se lanzó), un console.log puede emitir EPIPE y tumbar
+// el proceso principal. Se ignora ese error de transporte.
+for (const stream of [process.stdout, process.stderr]) {
+  if (stream && typeof stream.on === 'function') {
+    stream.on('error', () => { /* consola cerrada: no es un error de la app */ });
+  }
+}
 const { app, BrowserWindow, ipcMain, shell, nativeTheme, dialog, nativeImage } = require('electron');
 const path = require('path');
 const chokidar = require('chokidar');
@@ -161,6 +169,10 @@ function startWatching() {
       P.opencodeWal,
       P.codexSessions,
       P.geminiSummaries,
+      P.copilotDb,
+      P.CURSOR_DB,
+      P.CLINE_TASKS,
+      P.ROO_TASKS,
     ],
     {
       ignoreInitial: true,
