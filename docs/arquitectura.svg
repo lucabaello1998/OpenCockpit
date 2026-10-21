@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="430" viewBox="0 0 1000 430" role="img" aria-label="Arquitectura de Claude Cockpit">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="430" viewBox="0 0 1000 430" role="img" aria-label="Arquitectura de OpenCockpit">
   <!-- Todo el estilo va como atributo de presentacion, no en una hoja aparte:
        GitHub sanea los SVG del README y podria descartarla. -->
   <defs>
@@ -15,15 +15,15 @@
     <text x="30" y="34" font-size="10.5" fill="#6b675f" letter-spacing="0.6">TU DISCO</text>
     <rect x="30" y="46" width="250" height="250" rx="9" fill="#1a1a18" stroke="#2c2c29"/>
 
-    <text x="50" y="76" font-size="13" font-weight="700" fill="#ece9e3">~/.claude</text>
-    <text x="50" y="100" font-size="10.5" fill="#6b675f" font-family="Consolas, ui-monospace, monospace">projects/**/*.jsonl</text>
-    <text x="50" y="117" font-size="11" fill="#918c81">conversaciones y usage</text>
-    <text x="50" y="142" font-size="10.5" fill="#6b675f" font-family="Consolas, ui-monospace, monospace">projects/**/subagents/</text>
-    <text x="50" y="159" font-size="11" fill="#918c81">gasto de los subagentes</text>
-    <text x="50" y="184" font-size="10.5" fill="#6b675f" font-family="Consolas, ui-monospace, monospace">settings.json · .mcp.json</text>
-    <text x="50" y="201" font-size="11" fill="#918c81">hooks, MCP, skills</text>
-    <text x="50" y="226" font-size="10.5" fill="#6b675f" font-family="Consolas, ui-monospace, monospace">usage-data/</text>
-    <text x="50" y="243" font-size="11" fill="#918c81">métricas por sesión</text>
+    <text x="50" y="76" font-size="13" font-weight="700" fill="#ece9e3">Tus herramientas</text>
+    <text x="50" y="100" font-size="10.5" fill="#6b675f" font-family="Consolas, ui-monospace, monospace">~/.claude</text>
+    <text x="50" y="117" font-size="11" fill="#918c81">Claude Code · usage y config</text>
+    <text x="50" y="142" font-size="10.5" fill="#6b675f" font-family="Consolas, ui-monospace, monospace">~/.local/share/opencode</text>
+    <text x="50" y="159" font-size="11" fill="#918c81">OpenCode · SQLite</text>
+    <text x="50" y="184" font-size="10.5" fill="#6b675f" font-family="Consolas, ui-monospace, monospace">~/.codex · ~/.gemini</text>
+    <text x="50" y="201" font-size="11" fill="#918c81">Codex · Gemini/Antigravity</text>
+    <text x="50" y="226" font-size="10.5" fill="#6b675f" font-family="Consolas, ui-monospace, monospace">%APPDATA%/Code · Cursor</text>
+    <text x="50" y="243" font-size="11" fill="#918c81">Copilot · Cursor · Cline/Roo</text>
     <text x="50" y="272" font-size="11" fill="#918c81">Solo lectura. Nunca escribe sin</text>
     <text x="50" y="288" font-size="11" fill="#918c81">que lo confirmes.</text>
 
@@ -43,7 +43,7 @@
     <text x="370" y="236" font-size="11" fill="#918c81">Todo lo que viene de afuera pasa</text>
     <text x="370" y="252" font-size="11" fill="#918c81">por safePaths antes de tocar disco.</text>
 
-    <text x="370" y="281" font-size="11" fill="#918c81">Sin backend. Sin base de datos.</text>
+    <text x="370" y="281" font-size="11" fill="#918c81">7 proveedores. Sin backend.</text>
 
     <!-- ============ renderer ============ -->
     <text x="710" y="34" font-size="10.5" fill="#6b675f" letter-spacing="0.6">VENTANA (REACT)</text>

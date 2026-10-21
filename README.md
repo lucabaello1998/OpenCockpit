@@ -3,6 +3,7 @@
   <img alt="React" src="https://img.shields.io/badge/React-19-2b2b28?style=flat-square&labelColor=1a1a18">
   <img alt="Sin telemetría" src="https://img.shields.io/badge/telemetr%C3%ADa-ninguna-d97757?style=flat-square&labelColor=1a1a18">
   <img alt="Windows" src="https://img.shields.io/badge/Windows-instalador-2b2b28?style=flat-square&labelColor=1a1a18">
+  <img alt="Licencia" src="https://img.shields.io/badge/licencia-MIT-3d7a3d?style=flat-square&labelColor=1a1a18">
 </p>
 
 # OpenCockpit
@@ -72,9 +73,10 @@ precios pública).
 - **Tokens y costo**: series por período, caché, subagentes y tabla por sesión.
   Si la fuente no registra costo (Codex/Gemini) o el modelo es gratis, cae a
   tokens en vez de mostrar todo en $0.
-- **Conversaciones**: lista e hilo completo de Claude, OpenCode y Codex. En
-  Gemini/Antigravity se lista la sesión con su fecha y proyecto, y se avisa que
-  la transcripción no es legible sin el esquema protobuf.
+- **Conversaciones**: lista e hilo completo de Claude, OpenCode, Codex,
+  Copilot, Cursor y Cline/Roo. En Gemini/Antigravity se lista la sesión con su
+  fecha y proyecto, y se avisa que la transcripción no es legible sin el esquema
+  protobuf.
 - **Memorias, Boards, Configuración, Repaso**: paneles de Claude Code (MCP,
   hooks, skills, workflows, memoria y límites). Siguen funcionando igual y se
   aclara cuando el filtro está en otro proveedor.
@@ -83,8 +85,8 @@ precios pública).
 
 - Claude: los requests se deduplican por `message.id` + `requestId` entre
   transcripts padre e hijo; los subagentes se suman a la sesión raíz.
-- OpenCode: los totales por sesión salen de `session_v2`; el detalle sale de
-  `session_message.data.tokens`. Las sesiones hijas se suman a la raíz.
+- OpenCode: el detalle sale de `session_message.data.tokens`. Las sesiones hijas
+  se suman a la raíz.
 - Codex: `token_count` es acumulativo; se guarda el delta entre eventos y se
   separan los tokens cacheados del input.
 - Sin tabla de precios no se grafican dólares: se muestran tokens exactos.
@@ -120,4 +122,4 @@ telemetría.
 
 ## Licencia
 
-UNLICENSED. Todos los derechos reservados.
+MIT. Ver [LICENSE](LICENSE).
