@@ -1,4 +1,8 @@
 <p align="center">
+  <img alt="OpenCockpit" src="docs/banner.svg" width="880">
+</p>
+
+<p align="center">
   <img alt="Electron" src="https://img.shields.io/badge/Electron-44-2b2b28?style=flat-square&labelColor=1a1a18">
   <img alt="React" src="https://img.shields.io/badge/React-19-2b2b28?style=flat-square&labelColor=1a1a18">
   <img alt="Sin telemetría" src="https://img.shields.io/badge/telemetr%C3%ADa-ninguna-d97757?style=flat-square&labelColor=1a1a18">
@@ -28,6 +32,30 @@ El **filtro de proveedor** del encabezado acota todo el panel (Resumen, Tokens y
 Conversaciones) a una sola herramienta o suma todas. Cada herramienta tiene su
 paleta: al elegirla, el acento y el degradado animado del fondo cambian de color
 (naranja para Claude, azul/violeta para Gemini, verde para Codex, etc.).
+
+![Resumen](docs/capturas/resumen.png)
+
+## Capturas
+
+| Tokens y costo | Conversaciones |
+|---|---|
+| ![Tokens y costo](docs/capturas/tokens-y-costos.png) | ![Conversaciones](docs/capturas/conversaciones.png) |
+
+## Por qué existe
+
+- **Un solo lugar.** Si usás Claude Code para una cosa, OpenCode para otra y Codex
+  para un experimento, tener tres números distintos no te dice nada. Acá se suman
+  (o se separan con el filtro de proveedor).
+- **Historial completo, no el último día.** Lo que cada herramienta deja en disco
+  se lee y se agrega: sesiones viejas, subagentes y conversaciones siguen ahí.
+- **Sin backend.** No hay servidor, no hay cuenta, no hay telemetría: la app lee
+  archivos locales y no manda nada, salvo las dos acciones que pedís a mano
+  (actualizar límites de Claude y buscar precios).
+- **Números que cierran.** Deduplicación por `message.id`/`requestId`, subagentes
+  sumados a la sesión raíz y deltas para los `token_count` acumulativos.
+
+Lo que **no** hace: no te loguea en ninguna herramienta, no reemplaza sus CLIs y
+no inventa costos cuando la fuente no los registra (muestra tokens en su lugar).
 
 ## Instalar
 
