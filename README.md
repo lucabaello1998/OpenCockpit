@@ -9,6 +9,7 @@
   <img alt="Windows" src="https://img.shields.io/badge/Windows-instalador-2b2b28?style=flat-square&labelColor=1a1a18">
   <img alt="Licencia" src="https://img.shields.io/badge/licencia-MIT-3d7a3d?style=flat-square&labelColor=1a1a18">
   <img alt="CI" src="https://github.com/lucabaello1998/OpenCockpit/actions/workflows/ci.yml/badge.svg">
+  <a href="https://github.com/lucabaello1998/opencockpit/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/lucabaello1998/opencockpit?label=release&style=flat-square&labelColor=1a1a18"></a>
 </p>
 
 # OpenCockpit
