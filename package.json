@@ -16,24 +16,24 @@
     "icon": "node scripts/make-icon.cjs"
   },
   "dependencies": {
-    "@xyflow/react": "^12.3.0",
+    "@xyflow/react": "^12.12.1",
     "chokidar": "^5.0.0",
-    "d3-force": "^3.0.0",
-    "electron-updater": "^6.8.9"
+    "d3-force": "^3.0.1",
+    "electron-updater": "^6.8.11"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-react": "^6.2.1",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "electron": "^44.0.0",
-    "electron-builder": "^26.15.3",
-    "eslint": "^10.9.1",
-    "globals": "^17.11.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "electron-builder": "^26.18.0",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "recharts": "^3.10.1",
-    "vite": "^8.2.2",
-    "wait-on": "^9.0.1"
+    "vite": "^8.3.6",
+    "wait-on": "^9.5.1"
   },
   "build": {
     "appId": "com.lucabaello1998.opencockpit",
