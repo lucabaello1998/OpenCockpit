@@ -8,6 +8,7 @@
   <img alt="Sin telemetría" src="https://img.shields.io/badge/telemetr%C3%ADa-ninguna-d97757?style=flat-square&labelColor=1a1a18">
   <img alt="Windows" src="https://img.shields.io/badge/Windows-instalador-2b2b28?style=flat-square&labelColor=1a1a18">
   <img alt="Licencia" src="https://img.shields.io/badge/licencia-MIT-3d7a3d?style=flat-square&labelColor=1a1a18">
+  <img alt="CI" src="https://github.com/lucabaello1998/OpenCockpit/actions/workflows/ci.yml/badge.svg">
 </p>
 
 # OpenCockpit
@@ -78,9 +79,26 @@ npm start          # build + abrir la app
 |---|---|
 | `npm run dev` | Vite + Electron con hot reload |
 | `npm start` | build y abre la app |
+| `npm run lint` | ESLint sobre todo el repo |
 | `npm run dist` | instalador NSIS en `release/` |
 | `npm run audit` | la suite de seguridad y correctitud |
 | `npm run icon` | regenera `build/icon.ico` |
+
+Node 20 o superior (el CI usa la 24). La app no necesita ningún backend: lee
+archivos locales.
+
+## Cómo usarlo
+
+1. Abrí la app con las herramientas ya usadas en la máquina (si nunca corriste
+   Claude Code, OpenCode o Codex, no hay nada que mostrar).
+2. Elegí el proveedor en el filtro del encabezado (o *Todas*) y mirá
+   **Resumen**: sesiones, tokens, costo y los medidores de límite de Claude.
+3. **Tokens y costo** desglosa por período y por sesión; **Conversaciones** abre
+   el hilo completo.
+4. **Requisitos** dice qué falta para las funciones que necesitan hablar con un
+   servicio (Azure DevOps, Jira, grafo de código) y lo configura desde ahí.
+
+Todo se lee del disco: no hay cuenta, ni servidor, ni telemetría.
 
 ## La primera vez
 
@@ -147,6 +165,32 @@ telemetría.
    `latest.yml`.
 3. Publicá esos archivos en el release de GitHub del repo
    `lucabaello1998/OpenCockpit`. El auto-updater los busca ahí.
+
+```bash
+# con el CLI de GitHub, sobre el tag de la versión
+gh release create v1.2.0 release/OpenCockpit-Setup-1.2.0.exe \
+  release/OpenCockpit-Setup-1.2.0.exe.blockmap release/latest.yml \
+  --repo lucabaello1998/OpenCockpit --title "OpenCockpit 1.2.0" --notes "..."
+```
+
+`latest.yml` tiene que subirse **junto** al instalador: es lo que el
+auto-updater lee para saber que hay una versión nueva y comparar el hash. Si
+falta, las instalaciones viejas no se enteran nunca.
+
+El instalador no está firmado (el certificado de code signing es pago), así que
+Windows muestra SmartScreen la primera vez: *Más información → Ejecutar de todas
+formas*. Es el mismo binario que compilás vos con `npm run dist`.
+
+## CI
+
+`.github/workflows/ci.yml` corre en cada push y PR, sobre **windows-latest** (el
+target real): `npm ci`, `npm run lint`, `npm run audit` (las 320+ comprobaciones
+de seguridad y correctitud), el build de Vite y `electron-builder --dir`, que
+empaqueta la app sin publicar. El empaquetado no es redundante: es el paso que
+rompe cuando cambia una dependencia nativa o la config de `build`.
+
+El workflow **no publica**: el release lo hacés vos a mano con los pasos de
+arriba.
 
 ## Licencia
 

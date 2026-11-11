@@ -57,9 +57,14 @@ npm start          # build and open the app
 |---|---|
 | `npm run dev` | Vite + Electron with hot reload |
 | `npm start` | build and open the app |
+| `npm run lint` | ESLint across the repo |
 | `npm run dist` | NSIS installer in `release/` |
 | `npm run audit` | security and correctness checks |
 | `npm run icon` | regenerate `build/icon.ico` |
+
+CI (`.github/workflows/ci.yml`) runs on `windows-latest` — the actual target —
+and does `npm ci`, `npm run lint`, `npm run audit`, the Vite build and
+`electron-builder --dir` (packages the app without publishing).
 
 Requires **Node 20+**. Tested on Windows. Packaging currently produces a
 Windows installer only.
@@ -128,6 +133,10 @@ sanitization of rendered content. The app has no server and no telemetry.
    `release/`.
 3. Publish those files in the `lucabaello1998/OpenCockpit` GitHub release. The
    auto-updater looks for them there.
+
+`latest.yml` must ship **with** the installer: it is what existing installs read
+to notice a new version and compare the hash. Without it, older installs never
+find out.
 
 The updater **never installs anything on its own**: it tells you, shows the
 release notes, and you choose when to download and when to restart.
